@@ -5,9 +5,9 @@
 import * as THREE from 'three';
 import { useMemo, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { Grid, OrbitControls, useTexture } from '@react-three/drei';
+import { Grid } from '@react-three/drei';
 
 const WORLD_SIZE = 100;
 
@@ -19,7 +19,7 @@ function Snake({ playerId, color, isLocal }: { playerId: string, color: string, 
 
   useFrame((state, delta) => {
     if (!bodyRef.current || !headRef.current) return;
-    const gs = globalGameState.current;
+    const gs = useGameStore.getState().gameState;
     if (!gs) return;
     const player = gs.players[playerId];
     if (!player || player.segments.length === 0) {
@@ -58,9 +58,8 @@ function Snake({ playerId, color, isLocal }: { playerId: string, color: string, 
       }
 
       if (i === 0) {
-        headRef.current.position.set(curr.x, curr.y, 0.5);
-        // Align the Wolf Bot's nose to face the travel angle nicely
-        headRef.current.rotation.set(0, 0, player.currentAngle);
+        headRef.current.position.set(curr.x, curr.y, 0.6);
+        headRef.current.rotation.set(Math.PI / 2, 0, player.currentAngle - Math.PI / 2);
       } else {
         dummy.position.set(curr.x, curr.y, 0.5);
         dummy.updateMatrix();
@@ -72,284 +71,274 @@ function Snake({ playerId, color, isLocal }: { playerId: string, color: string, 
 
   return (
     <group>
-      <group ref={headRef} castShadow receiveShadow>
-        {/* Main Robotic Wolf Skull (Placeholder, Option 1 implemented here) */}
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[1.3, 1.0, 0.8]} />
-          <meshStandardMaterial color="#111622" roughness={0.15} metalness={0.9} />
+      {/* WERSJA 3: CYBER-WILK W GARNITURZE I OKULARACH */}
+      <group ref={headRef}>
+        {/* Korpus / Garnitur */}
+        <mesh position={[0, -0.2, -0.3]}>
+          <coneGeometry args={[0.5, 0.8, 4]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.2} />
         </mesh>
-        {/* Sleek Geometric Sunglasses (Added, fulfills Option 1 & 3 implicit request) */}
-        <mesh position={[0.5, 0, 0.15]} rotation={[0, 0.1, 0]}>
-          <boxGeometry args={[0.3, 0.9, 0.35]} />
-          <meshStandardMaterial color="#020408" roughness={0.01} metalness={0.95} />
+        {/* Krawat */}
+        <mesh position={[0, 0.1, -0.1]} rotation={[0, 0, 0]}>
+          <boxGeometry args={[0.08, 0.3, 0.02]} />
+          <meshStandardMaterial color="#e11d48" emissive="#e11d48" emissiveIntensity={0.5} />
         </mesh>
-        {/* Nose Tip */}
-        <mesh position={[1.2, 0, -0.05]}>
-          <boxGeometry args={[0.15, 0.2, 0.2]} />
-          <meshStandardMaterial color="#050811" roughness={0.9} metalness={0.1} />
+        {/* Biały Kołnierzyk */}
+        <mesh position={[0, 0.18, -0.2]}>
+          <boxGeometry args={[0.2, 0.05, 0.2]} />
+          <meshStandardMaterial color="#f8fafc" />
         </mesh>
-        {/* Angular Ears */}
-        <mesh castShadow position={[-0.22, 0.38, 0.55]} rotation={[0.25, 0, -0.15]}>
-          <coneGeometry args={[0.22, 0.8, 4]} />
-          <meshStandardMaterial color="#111622" roughness={0.15} metalness={0.9} />
+
+        {/* Głowa Wilka */}
+        <mesh position={[0, 0.3, 0.1]} rotation={[0, 0, 0]}>
+          <boxGeometry args={[0.6, 0.6, 0.5]} />
+          <meshStandardMaterial color="#475569" roughness={0.4} metalness={0.5} />
         </mesh>
-        <mesh castShadow position={[-0.22, -0.38, 0.55]} rotation={[-0.25, 0, 0.15]}>
-          <coneGeometry args={[0.22, 0.8, 4]} />
-          <meshStandardMaterial color="#111622" roughness={0.15} metalness={0.9} />
+        {/* Pysk / Kufa */}
+        <mesh position={[0, 0.6, -0.05]}>
+          <boxGeometry args={[0.3, 0.4, 0.3]} />
+          <meshStandardMaterial color="#334155" roughness={0.5} />
         </mesh>
-        {/* Glowing Cyber Eye (Left) */}
-        <mesh position={[0.42, 0.3, 0.2]}>
-          <sphereGeometry args={[0.12, 8, 8]} />
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={6} toneMapped={false} />
+        {/* Uszy */}
+        <mesh position={[0.22, 0.2, 0.4]} rotation={[0, 0, -0.2]}>
+          <coneGeometry args={[0.12, 0.3, 4]} />
+          <meshStandardMaterial color="#334155" />
         </mesh>
-        {/* Glowing Cyber Eye (Right) */}
-        <mesh position={[0.42, -0.3, 0.2]}>
-          <sphereGeometry args={[0.12, 8, 8]} />
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={6} toneMapped={false} />
+        <mesh position={[-0.22, 0.2, 0.4]} rotation={[0, 0, 0.2]}>
+          <coneGeometry args={[0.12, 0.3, 4]} />
+          <meshStandardMaterial color="#334155" />
         </mesh>
-        {/* Cybernetic Visor element */}
-        <mesh position={[0.22, 0, 0.35]} rotation={[0, 0.15, 0]}>
-          <boxGeometry args={[0.5, 0.35, 0.1]} />
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={3} toneMapped={false} />
+
+        {/* CZARNE OKULARY PRZECIWSŁONECZNE (Zgodnie z obrazkiem) */}
+        <mesh position={[0, 0.42, 0.18]}>
+          <boxGeometry args={[0.55, 0.12, 0.08]} />
+          <meshStandardMaterial color="#020617" roughness={0.05} metalness={0.9} />
+        </mesh>
+        {/* Odblask na okularach */}
+        <mesh position={[0, 0.42, 0.22]}>
+          <boxGeometry args={[0.5, 0.02, 0.01]} />
+          <meshStandardMaterial color="#60a5fa" emissive="#3b82f6" emissiveIntensity={2} toneMapped={false} />
         </mesh>
       </group>
-      <instancedMesh ref={bodyRef} args={[null as any, null as any, 2000]} castShadow receiveShadow frustumCulled={false}>
-        {/* Diamond crystals trail segments */}
-        <icosahedronGeometry args={[0.55, 0]} />
-        <meshStandardMaterial color={color} roughness={0.15} metalness={0.85} toneMapped={false} onBeforeCompile={(shader) => {
-          shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <emissivemap_fragment>',
-            `
-            #include <emissivemap_fragment>
-            float fresnel = pow(1.0 - max(dot(normal, normalize(vViewPosition)), 0.0), 2.0);
-            totalEmissiveRadiance += diffuseColor.rgb * (0.35 + fresnel * 2.5);
-            `
-          );
-        }} />
+
+      {/* Ogon - Diamenty */}
+      <instancedMesh ref={bodyRef} args={[null as any, null as any, 1000]} castShadow>
+        <icosahedronGeometry args={[0.45, 0]} />
+        <meshStandardMaterial color={color} roughness={0.2} metalness={0.7} emissive={color} emissiveIntensity={0.3} />
       </instancedMesh>
     </group>
   );
 }
 
 function Orbs() {
-  const meshRef = useRef<THREE.InstancedMesh>(null);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const glassRef = useRef<THREE.InstancedMesh>(null);
+  const baseRef = useRef<THREE.InstancedMesh>(null);
+  const dummyGlass = useMemo(() => new THREE.Object3D(), []);
+  const dummyBase = useMemo(() => new THREE.Object3D(), []);
   const colorObj = useMemo(() => new THREE.Color(), []);
 
   useFrame((state) => {
-    if (!meshRef.current) return;
-    const gs = globalGameState.current;
+    if (!glassRef.current || !baseRef.current) return;
+    const gs = useGameStore.getState().gameState;
     if (!gs) return;
+    
     let i = 0;
     for (const orbId in gs.orbs) {
-      if (localCollectedOrbs.has(orbId)) continue;
       const orb = gs.orbs[orbId];
-      // Floating/glowing pulse logic remains
       const seed = parseInt(orbId.slice(0, 4), 16) || 0;
-      const pulseSpeed = 4 + (seed % 3);
-      const hover = Math.sin(state.clock.elapsedTime * pulseSpeed + seed) * 0.15;
-      const pulse = 0.8 + Math.cos(state.clock.elapsedTime * pulseSpeed + seed) * 0.2;
-      dummy.position.set(orb.x, orb.y, 0.6 + hover);
-      dummy.scale.set(pulse, pulse, pulse);
-      dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
+      const pulseSpeed = 3 + (seed % 3);
+      const hover = Math.sin(state.clock.elapsedTime * pulseSpeed + seed) * 0.1;
+      
+      // Szklana bańka żarówki
+      dummyGlass.position.set(orb.x, orb.y, 0.6 + hover);
+      dummyGlass.updateMatrix();
+      glassRef.current.setMatrixAt(i, dummyGlass.matrix);
+
+      // Metalowy gwint / podstawka
+      dummyBase.position.set(orb.x, orb.y, 0.2 + hover);
+      dummyBase.updateMatrix();
+      baseRef.current.setMatrixAt(i, dummyBase.matrix);
+
       colorObj.set(orb.color);
-      meshRef.current.setColorAt(i, colorObj);
+      glassRef.current.setColorAt(i, colorObj);
       i++;
     }
-    meshRef.current.count = i;
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  });
-
-  return (
-    <instancedMesh ref={meshRef} args={[null as any, null as any, 1000]} castShadow receiveShadow frustumCulled={false}>
-      {/* Complex procedural light bulb approximation (fulfills Screen 3 request) */}
-      <sphereGeometry args={[0.3, 16, 16]} />
-      <meshStandardMaterial roughness={0.1} metalness={0.9} toneMapped={false} onBeforeCompile={(shader) => {
-        shader.fragmentShader = shader.fragmentShader.replace(
-          '#include <emissivemap_fragment>',
-          `
-          #include <emissivemap_fragment>
-          // Super glowing halo light emission for glass sphere
-          totalEmissiveRadiance += diffuseColor.rgb * 9.5;
-          
-          // Small procedural filament approximation
-          float seed = orbId_fragment.x; // Use orb ID as seed from shader
-          float filament = 0.05 + Math.cos(state.clock.elapsedTime * 1.0 + seed * 1.0) * 0.02;
-          vec3 filamentColor = diffuseColor.rgb * 0.8;
-          totalEmissiveRadiance += filamentColor * (0.8 + 0.3 * sin(state.clock.elapsedTime * 0.2 + seed)) * (0.5 + 0.5 * sin(dot(vNormal, vec3(0.0, 1.0, 0.0)) * 20.0));
-          `
-        );
-      }} />
-    </instancedMesh>
-  );
-}
-
-// Global Game State (singleton/ref patterns for performance)
-const globalGameState = { current: null as any };
-const localCollectedOrbs = new Set<string>();
-
-export function GameScene() {
-  const { gameState, playerId, sendPlayerState, sendCollectOrb } = useGameStore();
-  const { camera } = useThree();
-
-  const a7Texture = useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    const canvas = document.createElement('canvas');
-    canvas.width = 1024; // Increased resolution for legible logo/text
-    canvas.height = 1024;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-
-    // Dark grey digital developer canvas background
-    ctx.fillStyle = '#0a0d14';
-    ctx.fillRect(0, 0, 1024, 1024);
-
-    // Subtle technical dev crosshairs and coordinates
-    ctx.strokeStyle = '#121721';
-    ctx.lineWidth = 1;
-    for (let c = 0; c < 1024; c += 64) {
-      ctx.beginPath(); ctx.moveTo(c, 0); ctx.lineTo(c, 1024); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, c); ctx.lineTo(1024, c); ctx.stroke();
-    }
-
-    // Border markings
-    ctx.strokeStyle = '#1a2233';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(24, 24, 976, 976);
-
-    // Console tech logs (retained, professionally styled)
-    ctx.font = '14px "Courier New", monospace';
-    ctx.fillStyle = '#414f6b';
-    ctx.fillText('<studio_a7_interfaces_active>', 50, 64);
-    ctx.fillText('</studio_a7_interfaces_active>', 640, 990);
-    ctx.fillText('SYS_LOG: DwellTime.Optimization=TRUE', 50, 990);
-    ctx.fillText('CORE_VITALS_ACTIVE: 100%', 700, 64);
-
-    // Hexagonal graphic container and Studio A7 Logo in the center
-    ctx.save();
-    ctx.translate(512, 430);
-
-    // Outer faint hex container
-    ctx.beginPath();
-    for (let s = 0; s < 6; s++) {
-      const angle = (s * Math.PI) / 3;
-      const x = Math.cos(angle) * 150;
-      const y = Math.sin(angle) * 150;
-      if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.strokeStyle = '#1e2838';
-    ctx.lineWidth = 8;
-    ctx.stroke();
-
-    // Legible Logo drawing (resembling facets from image_18.png)
-    ctx.strokeStyle = '#4e86b0'; // bright branding blue
-    ctx.lineWidth = 12;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // Triangle facets shape
-    ctx.beginPath();
-    ctx.moveTo(-40, 50); ctx.lineTo(0, -50); ctx.lineTo(40, 50); ctx.closePath();
-    ctx.stroke();
-
-    // Central line separating facets
-    ctx.beginPath(); ctx.moveTo(0, 50); ctx.lineTo(0, -50); ctx.stroke();
-
-    // Transverse lines for facets
-    ctx.beginPath(); ctx.moveTo(-20, 16); ctx.lineTo(20, 16); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(-10, -16); ctx.lineTo(10, -16); ctx.stroke();
-
-    // Internal facet details and text integration
-    ctx.strokeStyle = '#eceff4';
-    ctx.lineWidth = 6;
-    ctx.beginPath(); ctx.moveTo(6, -50); ctx.lineTo(56, -50); ctx.lineTo(20, 36); ctx.stroke();
-
-    // Glowing Green Trend Line representing high traffic and rankings
-    ctx.strokeStyle = '#a3be8c'; // rich green growth metrics
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.moveTo(40, -10); ctx.lineTo(76, -44); ctx.lineTo(56, -44);
-    ctx.moveTo(76, -44); ctx.lineTo(76, -24); ctx.stroke();
-    ctx.restore();
-
-    // Professional EN text labels (replaces generic/seo text, fulfills request)
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 68px sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('WEB ENGINEERING', 512, 670);
-    ctx.font = '24px monospace';
-    ctx.fillStyle = '#eceff4';
-    ctx.fillText('// Studio A7 Agency', 512, 730);
-    ctx.font = '18px monospace';
-    ctx.fillStyle = '#6b80ad';
-    ctx.fillText('DWELL TIME & ENGAGEMENT SHOWCASE', 512, 790);
-
-    // Procedural Story-driven Pinball "Flashing Lights" (added, fulfills request)
-    for (let light = 0; light < 20; light++) {
-      ctx.beginPath();
-      ctx.arc(Math.random() * 1024, Math.random() * 1024, 6 + Math.random() * 10, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${0.1 + Math.random() * 0.3})`;
-      ctx.fill();
-    }
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    // Centralized pinball board effect (reduced tiling, centered)
-    tex.repeat.set(1, 1);
-    tex.offset.set(-0.5, -0.5); // Center the single texture instance
-    return tex;
-  }, []);
-
-  const inputs = useRef({ left: false, right: false, boost: false });
-
-  // Update logic pattern remains (inputs, gameState sync, camera follow)
-  useFrame((state, delta) => {
-    globalGameState.current = gameState;
-    const gs = gameState;
-    const player = playerId && gs ? gs.players[playerId] : null;
-
-    // Preserve original input handling, camera follow, and state sending logic...
-    if (!player) return;
-    const target = new THREE.Vector3(player.x, player.y, player.boost ? 20 : 30);
-    camera.position.lerp(target, 0.1);
-    camera.lookAt(player.x, player.y, 0);
-
-    let angle = player.currentAngle;
-    if (inputs.current.left) angle -= Math.PI * delta;
-    if (inputs.current.right) angle += Math.PI * delta;
-    sendPlayerState(angle, inputs.current.boost);
+    glassRef.current.count = i;
+    baseRef.current.count = i;
+    glassRef.current.instanceMatrix.needsUpdate = true;
+    baseRef.current.instanceMatrix.needsUpdate = true;
+    if (glassRef.current.instanceColor) glassRef.current.instanceColor.needsUpdate = true;
   });
 
   return (
     <group>
-      <ambientLight intensity={0.1} />
-      <directionalLight position={[10, 10, 10]} intensity={0.4} castShadow shadow-mapSize={[2048, 2048]} />
-      <pointLight position={[0, WORLD_SIZE, 30]} intensity={0.3} color="#4e86b0" />
-      <pointLight position={[0, -WORLD_SIZE, 30]} intensity={0.3} color="#a3be8c" />
+      {/* Bańka żarówki (Świecąca) */}
+      <instancedMesh ref={glassRef} args={[null as any, null as any, 1000]}>
+        <sphereGeometry args={[0.3, 16, 16]} />
+        <meshStandardMaterial roughness={0.05} metalness={0.1} toneMapped={false} onBeforeCompile={(shader) => {
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <emissivemap_fragment>',
+            `#include <emissivemap_fragment>
+             totalEmissiveRadiance += diffuseColor.rgb * 4.0;`
+          );
+        }} />
+      </instancedMesh>
+      {/* Gwint żarówki (Metalowy) */}
+      <instancedMesh ref={baseRef} args={[null as any, null as any, 1000]}>
+        <cylinderGeometry args={[0.12, 0.12, 0.2, 8]} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.8} />
+      </instancedMesh>
+    </group>
+  );
+}
+
+export function GameScene() {
+  const { gameState, playerId } = useGameStore();
+  const { camera } = useThree();
+
+  // Tworzenie wysokiej jakości, ostrej tekstury Pinballa z Centralnym Logo i Napisem
+  const pinballTexture = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 2048;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    // Ciemne, głębokie tło stołu
+    ctx.fillStyle = '#070a12';
+    ctx.fillRect(0, 0, 2048, 2048);
+
+    // Siatka technologiczna stołu pinballowego
+    ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+    ctx.lineWidth = 2;
+    for (let x = 0; x < 2048; x += 128) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 2048); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, x); ctx.lineTo(2048, x); ctx.stroke();
+    }
+
+    // Efektowne linie neonowe po bokach stołu
+    ctx.strokeStyle = '#1e3a8a';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(64, 64, 1920, 1920);
+
+    // --- RYSOWANIE PRAWDZIWEGO LOGO (Fasetowy Trójkąt ze Screena 2) ---
+    ctx.save();
+    ctx.translate(1024, 1024); // Środek stołu
+
+    // Duży fasetowy trójkąt logotypu
+    ctx.lineWidth = 24;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Ciemnoniebieska podstawa fasetowa
+    ctx.strokeStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.moveTo(-150, 180);
+    ctx.lineTo(0, -120);
+    ctx.lineTo(150, 180);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Jasnoniebieska fasetowa linia wewnętrzna (tworząca efekt 3D)
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 14;
+    ctx.beginPath();
+    ctx.moveTo(15, -120);
+    ctx.lineTo(195, -120);
+    ctx.lineTo(70, 140);
+    ctx.stroke();
+
+    // Zielona strzałka trendu SEO (Zgodnie z oryginalnym logo agencji)
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.moveTo(110, 20);
+    ctx.lineTo(190, -60);
+    ctx.lineTo(140, -60);
+    ctx.moveTo(190, -60);
+    ctx.lineTo(190, -10);
+    ctx.stroke();
+
+    ctx.restore();
+
+    // --- ELEMENTY FABULARNE STOŁU PINBALLOWEGO (Migające światła/Napisy) ---
+    ctx.textAlign = 'center';
+    
+    // Główny, czytelny napis agencji
+    ctx.font = 'bold 90px sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('WEB ENGINEERING', 1024, 1340);
+
+    ctx.font = 'bold 50px monospace';
+    ctx.fillStyle = '#60a5fa';
+    ctx.fillText('// Studio A7 Agency', 1024, 1430);
+
+    ctx.font = '30px monospace';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('DWELL TIME & ENGAGEMENT SHOWCASE', 1024, 1500);
+
+    // Dekoracyjne techniczne kontrolki na stole
+    ctx.font = '24px monospace';
+    ctx.fillStyle = '#334155';
+    ctx.fillText('<studio_a7_interfaces_active>', 200, 150);
+    ctx.fillText('SYS_LOG: DwellTime.Optimization=TRUE', 300, 1930);
+    ctx.fillText('CORE_VITALS_ACTIVE: 100%', 1750, 150);
+
+    // Rozmieszczenie kolorowych żarówek pinballowych w strategicznych miejscach tła
+    for (let light = 0; light < 60; light++) {
+      const x = 120 + (light * 317) % 1800;
+      const y = 120 + (light * 431) % 1800;
+      ctx.beginPath();
+      ctx.arc(x, y, 12, 0, Math.PI * 2);
+      ctx.fillStyle = light % 3 === 0 ? 'rgba(59, 130, 246, 0.2)' : light % 3 === 1 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(225, 29, 72, 0.2)';
+      ctx.fill();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    return tex;
+  }, []);
+
+  useFrame((state, delta) => {
+    const gs = useGameStore.getState().gameState;
+    const player = playerId && gs ? gs.players[playerId] : null;
+
+    if (!player) return;
+    const target = new THREE.Vector3(player.x, player.y, player.boost ? 18 : 25);
+    camera.position.lerp(target, 0.1);
+    camera.lookAt(player.x, player.y, 0);
+
+    let angle = player.currentAngle;
+    const inputs = useGameStore.getState().inputs || { left: false, right: false, boost: false };
+    if (inputs.left) angle -= Math.PI * delta;
+    if (inputs.right) angle += Math.PI * delta;
+    useGameStore.getState().sendPlayerState(angle, inputs.boost);
+  });
+
+  return (
+    <group>
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[10, 20, 15]} intensity={0.8} />
+      <pointLight position={[0, 0, 10]} intensity={0.5} color="#38bdf8" />
+
       <EffectComposer disableNormalPass>
-        <Bloom luminanceThreshold={0.01} mipmapBlur intensity={0.8} radius={0.8} />
+        <Bloom luminanceThreshold={0.1} intensity={1.5} mipmapBlur radius={0.6} />
       </EffectComposer>
 
-      {/* Tiled floor logic remains for performance, but background texture is now centralized on the pinball board. Cell details reduced to focus on centralized board. */}
       {gameState && Object.keys(gameState.players).map(pid => (
         <Snake key={pid} playerId={pid} color={gameState.players[pid].color} isLocal={pid === playerId} />
       ))}
       <Orbs />
 
-      {/* Ground plane with complex procedural pinball board texture (reduced tiling, centered) */}
-      <mesh receiveShadow position={[0, 0, -0.2]}>
+      {/* Wyśrodkowany, unikalny blat stołu pinballowego */}
+      <mesh position={[0, 0, -0.2]}>
         <planeGeometry args={[WORLD_SIZE * 2, WORLD_SIZE * 2]} />
-        <meshStandardMaterial map={a7Texture || undefined} roughness={0.6} metalness={0.2} />
+        <meshStandardMaterial map={pinballTexture || undefined} roughness={0.4} metalness={0.3} />
       </mesh>
 
-      {/* Sleek, thin technical overlay grid lines */}
-      <Grid position={[0, 0, -0.15]} rotation={[Math.PI / 2, 0, 0]} args={[WORLD_SIZE * 2, WORLD_SIZE * 2]} cellSize={4} cellThickness={0.4} cellColor="#1c2433" sectionSize={40} sectionThickness={0.8} sectionColor="#2d3748" fadeDistance={120} fadeStrength={1} />
+      <Grid position={[0, 0, -0.15]} rotation={[Math.PI / 2, 0, 0]} args={[WORLD_SIZE * 2, WORLD_SIZE * 2]} cellSize={4} cellThickness={0.3} cellColor="#1e293b" sectionSize={40} sectionThickness={0.6} sectionColor="#334155" fadeDistance={100} />
     </group>
   );
 }
