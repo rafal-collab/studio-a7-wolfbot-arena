@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import * as THREE from 'three';
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
@@ -58,8 +58,9 @@ function Snake({ playerId, color, isLocal }: { playerId: string, color: string, 
       }
 
       if (i === 0) {
-        headRef.current.position.set(curr.x, curr.y, 0.6);
-        headRef.current.rotation.set(Math.PI / 2, 0, player.currentAngle - Math.PI / 2);
+        headRef.current.position.set(curr.x, curr.y, 0.8);
+        // Prawidłowe obracanie trójwymiarowej głowy w osi Z
+        headRef.current.rotation.set(0, 0, player.currentAngle);
       } else {
         dummy.position.set(curr.x, curr.y, 0.5);
         dummy.updateMatrix();
@@ -71,60 +72,43 @@ function Snake({ playerId, color, isLocal }: { playerId: string, color: string, 
 
   return (
     <group>
-      {/* WERSJA 3: CYBER-WILK W GARNITURZE I OKULARACH */}
+      {/* MODEL 3D: CYBER-WILK W OKULARACH (Zgodnie ze Screen 4) */}
       <group ref={headRef}>
-        {/* Korpus / Garnitur */}
-        <mesh position={[0, -0.2, -0.3]}>
-          <coneGeometry args={[0.5, 0.8, 4]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.2} />
+        {/* Główna czaszka/głowa wilka */}
+        <mesh castShadow>
+          <boxGeometry args={[1.4, 0.9, 0.8]} />
+          <meshStandardMaterial color="#334155" roughness={0.2} metalness={0.6} />
         </mesh>
-        {/* Krawat */}
-        <mesh position={[0, 0.1, -0.1]} rotation={[0, 0, 0]}>
-          <boxGeometry args={[0.08, 0.3, 0.02]} />
-          <meshStandardMaterial color="#e11d48" emissive="#e11d48" emissiveIntensity={0.5} />
+        {/* Kufa / Pysk */}
+        <mesh position={[0.6, 0, -0.1]}>
+          <boxGeometry args={[0.7, 0.5, 0.45]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.3} />
         </mesh>
-        {/* Biały Kołnierzyk */}
-        <mesh position={[0, 0.18, -0.2]}>
-          <boxGeometry args={[0.2, 0.05, 0.2]} />
-          <meshStandardMaterial color="#f8fafc" />
+        {/* Uszy sterczące */}
+        <mesh position={[-0.3, 0.3, 0.5]} rotation={[0, 0, -0.1]}>
+          <coneGeometry args={[0.15, 0.4, 4]} />
+          <meshStandardMaterial color="#1e293b" />
         </mesh>
-
-        {/* Głowa Wilka */}
-        <mesh position={[0, 0.3, 0.1]} rotation={[0, 0, 0]}>
-          <boxGeometry args={[0.6, 0.6, 0.5]} />
-          <meshStandardMaterial color="#475569" roughness={0.4} metalness={0.5} />
+        <mesh position={[-0.3, -0.3, 0.5]} rotation={[0, 0, 0.1]}>
+          <coneGeometry args={[0.15, 0.4, 4]} />
+          <meshStandardMaterial color="#1e293b" />
         </mesh>
-        {/* Pysk / Kufa */}
-        <mesh position={[0, 0.6, -0.05]}>
-          <boxGeometry args={[0.3, 0.4, 0.3]} />
-          <meshStandardMaterial color="#334155" roughness={0.5} />
+        {/* NOWOCZESNE CIEMNE OKULARY PRZECIWSŁONECZNE */}
+        <mesh position={[0.4, 0, 0.2]}>
+          <boxGeometry args={[0.2, 0.85, 0.25]} />
+          <meshStandardMaterial color="#020617" roughness={0.01} metalness={0.9} />
         </mesh>
-        {/* Uszy */}
-        <mesh position={[0.22, 0.2, 0.4]} rotation={[0, 0, -0.2]}>
-          <coneGeometry args={[0.12, 0.3, 4]} />
-          <meshStandardMaterial color="#334155" />
-        </mesh>
-        <mesh position={[-0.22, 0.2, 0.4]} rotation={[0, 0, 0.2]}>
-          <coneGeometry args={[0.12, 0.3, 4]} />
-          <meshStandardMaterial color="#334155" />
-        </mesh>
-
-        {/* CZARNE OKULARY PRZECIWSŁONECZNE (Zgodnie z obrazkiem) */}
-        <mesh position={[0, 0.42, 0.18]}>
-          <boxGeometry args={[0.55, 0.12, 0.08]} />
-          <meshStandardMaterial color="#020617" roughness={0.05} metalness={0.9} />
-        </mesh>
-        {/* Odblask na okularach */}
-        <mesh position={[0, 0.42, 0.22]}>
-          <boxGeometry args={[0.5, 0.02, 0.01]} />
-          <meshStandardMaterial color="#60a5fa" emissive="#3b82f6" emissiveIntensity={2} toneMapped={false} />
+        {/* Niebieski neonowy odblask na okularach */}
+        <mesh position={[0.51, 0, 0.2]}>
+          <boxGeometry args={[0.02, 0.75, 0.05]} />
+          <meshStandardMaterial color="#00d2ff" emissive="#00d2ff" emissiveIntensity={3} toneMapped={false} />
         </mesh>
       </group>
 
-      {/* Ogon - Diamenty */}
+      {/* Ogon Wilka - Lśniące kryształy */}
       <instancedMesh ref={bodyRef} args={[null as any, null as any, 1000]} castShadow>
-        <icosahedronGeometry args={[0.45, 0]} />
-        <meshStandardMaterial color={color} roughness={0.2} metalness={0.7} emissive={color} emissiveIntensity={0.3} />
+        <icosahedronGeometry args={[0.5, 0]} />
+        <meshStandardMaterial color={color} roughness={0.1} metalness={0.8} emissive={color} emissiveIntensity={0.4} />
       </instancedMesh>
     </group>
   );
@@ -146,16 +130,18 @@ function Orbs() {
     for (const orbId in gs.orbs) {
       const orb = gs.orbs[orbId];
       const seed = parseInt(orbId.slice(0, 4), 16) || 0;
-      const pulseSpeed = 3 + (seed % 3);
-      const hover = Math.sin(state.clock.elapsedTime * pulseSpeed + seed) * 0.1;
+      const pulseSpeed = 4 + (seed % 2);
+      const hover = Math.sin(state.clock.elapsedTime * pulseSpeed + seed) * 0.12;
+      const scalePulse = 1 + Math.sin(state.clock.elapsedTime * 5 + seed) * 0.1;
       
-      // Szklana bańka żarówki
-      dummyGlass.position.set(orb.x, orb.y, 0.6 + hover);
+      // Żaróweczka szklana
+      dummyGlass.position.set(orb.x, orb.y, 0.7 + hover);
+      dummyGlass.scale.set(scalePulse, scalePulse, scalePulse);
       dummyGlass.updateMatrix();
       glassRef.current.setMatrixAt(i, dummyGlass.matrix);
 
-      // Metalowy gwint / podstawka
-      dummyBase.position.set(orb.x, orb.y, 0.2 + hover);
+      // Gwint żarówki
+      dummyBase.position.set(orb.x, orb.y, 0.3 + hover);
       dummyBase.updateMatrix();
       baseRef.current.setMatrixAt(i, dummyBase.matrix);
 
@@ -172,21 +158,20 @@ function Orbs() {
 
   return (
     <group>
-      {/* Bańka żarówki (Świecąca) */}
+      {/* Prawdziwe, lśniące żaróweczki retro-creative */}
       <instancedMesh ref={glassRef} args={[null as any, null as any, 1000]}>
-        <sphereGeometry args={[0.3, 16, 16]} />
-        <meshStandardMaterial roughness={0.05} metalness={0.1} toneMapped={false} onBeforeCompile={(shader) => {
+        <sphereGeometry args={[0.35, 16, 16]} />
+        <meshStandardMaterial roughness={0.02} metalness={0.0} toneMapped={false} onBeforeCompile={(shader) => {
           shader.fragmentShader = shader.fragmentShader.replace(
             '#include <emissivemap_fragment>',
             `#include <emissivemap_fragment>
-             totalEmissiveRadiance += diffuseColor.rgb * 4.0;`
+             totalEmissiveRadiance += diffuseColor.rgb * 6.0;`
           );
         }} />
       </instancedMesh>
-      {/* Gwint żarówki (Metalowy) */}
       <instancedMesh ref={baseRef} args={[null as any, null as any, 1000]}>
-        <cylinderGeometry args={[0.12, 0.12, 0.2, 8]} />
-        <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.8} />
+        <cylinderGeometry args={[0.15, 0.15, 0.25, 8]} />
+        <meshStandardMaterial color="#64748b" roughness={0.3} metalness={0.8} />
       </instancedMesh>
     </group>
   );
@@ -195,9 +180,34 @@ function Orbs() {
 export function GameScene() {
   const { gameState, playerId } = useGameStore();
   const { camera } = useThree();
+  const inputs = useRef({ left: false, right: false, boost: false });
 
-  // Tworzenie wysokiej jakości, ostrej tekstury Pinballa z Centralnym Logo i Napisem
-  const pinballTexture = useMemo(() => {
+  // OBSŁUGA STEROWANIA KLAWIATURĄ (Przywrócona i naprawiona)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if (key === 'a' || e.key === 'ArrowLeft') inputs.current.left = true;
+      if (key === 'd' || e.key === 'ArrowRight') inputs.current.right = true;
+      if (e.key === ' ') inputs.current.boost = true;
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if (key === 'a' || e.key === 'ArrowLeft') inputs.current.left = false;
+      if (key === 'd' || e.key === 'ArrowRight') inputs.current.right = false;
+      if (e.key === ' ') inputs.current.boost = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  // PROFILOWANA, SPERSONALIZOWANA TEKSTURA BLATU PREMIUM (Zgodnie ze Screen 2)
+  const premiumTexture = useMemo(() => {
     if (typeof window === 'undefined') return null;
     const canvas = document.createElement('canvas');
     canvas.width = 2048;
@@ -205,93 +215,99 @@ export function GameScene() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    // Ciemne, głębokie tło stołu
-    ctx.fillStyle = '#070a12';
+    // Głębokie matowe tło command-center
+    ctx.fillStyle = '#090d16';
     ctx.fillRect(0, 0, 2048, 2048);
 
-    // Siatka technologiczna stołu pinballowego
-    ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
-    ctx.lineWidth = 2;
-    for (let x = 0; x < 2048; x += 128) {
+    // Dyskretna, nowoczesna siatka techniczna (bardzo cienka)
+    ctx.strokeStyle = 'rgba(51, 65, 85, 0.15)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < 2048; x += 64) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 2048); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, x); ctx.lineTo(2048, x); ctx.stroke();
     }
 
-    // Efektowne linie neonowe po bokach stołu
-    ctx.strokeStyle = '#1e3a8a';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(64, 64, 1920, 1920);
-
-    // --- RYSOWANIE PRAWDZIWEGO LOGO (Fasetowy Trójkąt ze Screena 2) ---
+    // --- PRECYZYJNE PROCEDURALNE ODWZOROWANIE LOGO STUDIO A7 (Screen 2) ---
     ctx.save();
-    ctx.translate(1024, 1024); // Środek stołu
+    ctx.translate(1024, 960); // Środek stołu
 
-    // Duży fasetowy trójkąt logotypu
-    ctx.lineWidth = 24;
+    // Funkcja pomocnicza do rysowania pojedynczych poligonów z gradientami
+    const drawTriangle = (p1: [number, number], p2: [number, number], p3: [number, number], colors: string[]) => {
+      const grad = ctx.createLinearGradient(p1[0], p1[1], p3[0], p3[1]);
+      grad.addColorStop(0, colors[0]);
+      grad.addColorStop(1, colors[1]);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(p1[0], p1[1]);
+      ctx.lineTo(p2[0], p2[1]);
+      ctx.lineTo(p3[0], p3[1]);
+      ctx.closePath();
+      ctx.fill();
+    };
+
+    // Rysowanie poszczególnych fasetów sygnetu w odcieniach błękitu i granatu
+    drawTriangle([-180, 180], [0, -160], [-60, 40], ['#003b73', '#005691']);
+    drawTriangle([-60, 40], [0, -160], [0, 40], ['#005691', '#007cc7']);
+    drawTriangle([0, 40], [0, -160], [60, 40], ['#007cc7', '#0099e5']);
+    drawTriangle([60, 40], [0, -160], [180, 180], ['#0099e5', '#33b5e5']);
+    drawTriangle([-180, 180], [-60, 40], [-40, 180], ['#002244', '#003b73']);
+    drawTriangle([-40, 180], [-60, 40], [0, 40], ['#003b73', '#007cc7']);
+    drawTriangle([-40, 180], [0, 40], [40, 180], ['#005691', '#0099e5']);
+    drawTriangle([40, 180], [0, 40], [60, 40], ['#007cc7', '#33b5e5']);
+    drawTriangle([60, 40], [180, 180], [40, 180], ['#0099e5', '#002244']);
+
+    // Ostra, czysta biało-błękitna linia krawędziowa tworząca ramię "7"
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 14;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-
-    // Ciemnoniebieska podstawa fasetowa
-    ctx.strokeStyle = '#0284c7';
     ctx.beginPath();
-    ctx.moveTo(-150, 180);
-    ctx.lineTo(0, -120);
-    ctx.lineTo(150, 180);
-    ctx.closePath();
+    ctx.moveTo(-10, -160);
+    ctx.lineTo(210, -160);
+    ctx.lineTo(60, 140);
     ctx.stroke();
 
-    // Jasnoniebieska fasetowa linia wewnętrzna (tworząca efekt 3D)
-    ctx.strokeStyle = '#38bdf8';
+    // Zielona, nowoczesna strzałka wzrostu SEO
+    ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 14;
     ctx.beginPath();
-    ctx.moveTo(15, -120);
-    ctx.lineTo(195, -120);
-    ctx.lineTo(70, 140);
-    ctx.stroke();
-
-    // Zielona strzałka trendu SEO (Zgodnie z oryginalnym logo agencji)
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 12;
-    ctx.beginPath();
-    ctx.moveTo(110, 20);
-    ctx.lineTo(190, -60);
-    ctx.lineTo(140, -60);
-    ctx.moveTo(190, -60);
-    ctx.lineTo(190, -10);
+    ctx.moveTo(110, -10);
+    ctx.lineTo(230, -110);
+    ctx.lineTo(160, -110);
+    ctx.moveTo(230, -110);
+    ctx.lineTo(230, -40);
     ctx.stroke();
 
     ctx.restore();
 
-    // --- ELEMENTY FABULARNE STOŁU PINBALLOWEGO (Migające światła/Napisy) ---
+    // --- NOWOCZESNA TYPOGRAFIA INTERAKTYWNA ---
     ctx.textAlign = 'center';
     
-    // Główny, czytelny napis agencji
-    ctx.font = 'bold 90px sans-serif';
+    // Czysty, bezszeryfowy, nowoczesny font zamiast lat 80.
+    ctx.font = '900 100px system-ui, -apple-system, sans-serif';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('WEB ENGINEERING', 1024, 1340);
+    ctx.letterSpacing = '4px';
+    ctx.fillText('WEB ENGINEERING', 1024, 1400);
 
-    ctx.font = 'bold 50px monospace';
-    ctx.fillStyle = '#60a5fa';
-    ctx.fillText('// Studio A7 Agency', 1024, 1430);
+    ctx.font = 'bold 42px monospace';
+    ctx.fillStyle = '#38bdf8';
+    ctx.letterSpacing = '2px';
+    ctx.fillText('// STUDIO A7 AGENCY', 1024, 1490);
 
-    ctx.font = '30px monospace';
+    ctx.font = '500 24px system-ui, -apple-system, sans-serif';
     ctx.fillStyle = '#475569';
-    ctx.fillText('DWELL TIME & ENGAGEMENT SHOWCASE', 1024, 1500);
+    ctx.letterSpacing = '6px';
+    ctx.fillText('DWELL TIME & ENGAGEMENT SHOWCASE', 1024, 1560);
 
-    // Dekoracyjne techniczne kontrolki na stole
-    ctx.font = '24px monospace';
-    ctx.fillStyle = '#334155';
-    ctx.fillText('<studio_a7_interfaces_active>', 200, 150);
-    ctx.fillText('SYS_LOG: DwellTime.Optimization=TRUE', 300, 1930);
-    ctx.fillText('CORE_VITALS_ACTIVE: 100%', 1750, 150);
-
-    // Rozmieszczenie kolorowych żarówek pinballowych w strategicznych miejscach tła
-    for (let light = 0; light < 60; light++) {
-      const x = 120 + (light * 317) % 1800;
-      const y = 120 + (light * 431) % 1800;
+    // Światełka pinballowe rozproszone estetycznie w tle
+    for (let light = 0; light < 40; light++) {
+      const x = 100 + (light * 521) % 1848;
+      const y = 100 + (light * 713) % 1848;
+      // Nie rysujemy świateł bezpośrednio na tekście i logo
+      if (Math.abs(x - 1024) < 400 && Math.abs(y - 1200) < 500) continue;
       ctx.beginPath();
-      ctx.arc(x, y, 12, 0, Math.PI * 2);
-      ctx.fillStyle = light % 3 === 0 ? 'rgba(59, 130, 246, 0.2)' : light % 3 === 1 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(225, 29, 72, 0.2)';
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = light % 2 === 0 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(34, 197, 94, 0.15)';
       ctx.fill();
     }
 
@@ -306,25 +322,27 @@ export function GameScene() {
     const player = playerId && gs ? gs.players[playerId] : null;
 
     if (!player) return;
-    const target = new THREE.Vector3(player.x, player.y, player.boost ? 18 : 25);
+    
+    // Płynna praca kamery podążającej za głową wilka
+    const target = new THREE.Vector3(player.x, player.y, player.boost ? 16 : 22);
     camera.position.lerp(target, 0.1);
     camera.lookAt(player.x, player.y, 0);
 
+    // Przesyłanie stanu sterowania do serwera multiplayer
     let angle = player.currentAngle;
-    const inputs = useGameStore.getState().inputs || { left: false, right: false, boost: false };
-    if (inputs.left) angle -= Math.PI * delta;
-    if (inputs.right) angle += Math.PI * delta;
-    useGameStore.getState().sendPlayerState(angle, inputs.boost);
+    if (inputs.current.left) angle -= Math.PI * 1.5 * delta;
+    if (inputs.current.right) angle += Math.PI * 1.5 * delta;
+    useGameStore.getState().sendPlayerState(angle, inputs.current.boost);
   });
 
   return (
     <group>
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[10, 20, 15]} intensity={0.8} />
-      <pointLight position={[0, 0, 10]} intensity={0.5} color="#38bdf8" />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 15, 20]} intensity={0.9} />
+      <pointLight position={[0, 0, 8]} intensity={0.4} color="#38bdf8" />
 
       <EffectComposer disableNormalPass>
-        <Bloom luminanceThreshold={0.1} intensity={1.5} mipmapBlur radius={0.6} />
+        <Bloom luminanceThreshold={0.1} intensity={1.2} radius={0.5} />
       </EffectComposer>
 
       {gameState && Object.keys(gameState.players).map(pid => (
@@ -332,13 +350,13 @@ export function GameScene() {
       ))}
       <Orbs />
 
-      {/* Wyśrodkowany, unikalny blat stołu pinballowego */}
+      {/* Blat stołu z nowym, wyrenderowanym poligonowo logo */}
       <mesh position={[0, 0, -0.2]}>
         <planeGeometry args={[WORLD_SIZE * 2, WORLD_SIZE * 2]} />
-        <meshStandardMaterial map={pinballTexture || undefined} roughness={0.4} metalness={0.3} />
+        <meshStandardMaterial map={premiumTexture || undefined} roughness={0.3} metalness={0.2} />
       </mesh>
 
-      <Grid position={[0, 0, -0.15]} rotation={[Math.PI / 2, 0, 0]} args={[WORLD_SIZE * 2, WORLD_SIZE * 2]} cellSize={4} cellThickness={0.3} cellColor="#1e293b" sectionSize={40} sectionThickness={0.6} sectionColor="#334155" fadeDistance={100} />
+      <Grid position={[0, 0, -0.15]} rotation={[Math.PI / 2, 0, 0]} args={[WORLD_SIZE * 2, WORLD_SIZE * 2]} cellSize={5} cellThickness={0.2} cellColor="#1e293b" sectionSize={50} sectionThickness={0.5} sectionColor="#334155" fadeDistance={90} />
     </group>
   );
 }
