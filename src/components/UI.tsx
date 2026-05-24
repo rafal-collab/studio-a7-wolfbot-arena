@@ -238,10 +238,10 @@ export function UI() {
       </AnimatePresence>
 
       {/* Footer Branding Telemetry */}
-      <div className="w-full pointer-events-auto flex justify-between items-center text-[10px] text-slate-600 border-t border-slate-900 pt-3 z-10 select-none">
-        <div> <span>SYSTEM_OPERATIONAL // SECURE SOCKETS ACTIVE (WSS)</span> </div>
-        <div> <span>STUDIO A7 Search Visibility Optimization Bot</span> </div>
-      </div>
+<div className="w-full pointer-events-auto flex justify-between items-start text-[10px] text-slate-600 border-t border-slate-900 pt-3 z-10 select-none">
+  <div> <span>SYSTEM_OPERATIONAL // SECURE SOCKETS ACTIVE (WSS)</span> </div>
+  <div> <span>// STUDIO A7: ADVANCED WEB INTERFACES SHOWCASE</span> </div>
+</div>
     </div>
   );
 }
