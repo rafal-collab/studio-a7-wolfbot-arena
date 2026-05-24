@@ -74,10 +74,6 @@ export function UI() {
 
         {/* System Utilities Corner */}
         <div className="flex gap-2 z-10">
-          <button onClick={() => setShowEmbedModal(true)} className="flex items-center gap-2 px-3.5 py-2 bg-slate-900/95 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 rounded text-slate-300 hover:text-white text-xs font-bold transition-all">
-            <Code2 size={14} className="text-blue-400" />
-            <span>DEPLOY & EMBED</span>
-          </button>
           <button onClick={handleOpenNewTab} className="flex items-center gap-2 px-3.5 py-2 bg-slate-900/95 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 rounded text-slate-300 hover:text-white text-xs font-bold transition-all">
             <ExternalLink size={14} />
             <span>NEW TAB</span>
