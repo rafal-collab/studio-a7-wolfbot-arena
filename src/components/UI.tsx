@@ -31,7 +31,7 @@ export function UI() {
 
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 font-mono select-none">
-      {/* Top Bar / Telemetry Console */}
+      {/* Top Bar */}
       <div className="flex justify-between items-start pointer-events-auto relative">
         <div className="flex flex-col gap-2 z-10 bg-slate-950/70 p-4 rounded-xl border border-slate-800/60 backdrop-blur-md">
           <div className="flex items-center gap-2">
@@ -54,7 +54,7 @@ export function UI() {
           </div>
         </div>
 
-        {/* Middle Indicators / Guide Keybinds */}
+        {/* Middle Indicators */}
         <div className="absolute left-1/2 -translate-x-1/2 top-0 flex flex-col items-center gap-1.5 opacity-90 hidden lg:flex">
           <div className="flex gap-2">
             <div className="flex items-center gap-1.5 text-[11px] text-slate-300 bg-slate-950/85 px-3 py-1 rounded border border-slate-800">
@@ -69,7 +69,6 @@ export function UI() {
           </div>
         </div>
 
-        {/* System Utilities Corner */}
         <div className="flex gap-2 z-10">
           <button onClick={() => setShowEmbedModal(true)} className="flex items-center gap-2 px-3.5 py-2 bg-slate-900/95 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 rounded text-slate-300 hover:text-white text-xs font-bold transition-all" >
             <Code2 size={14} className="text-blue-400" />
@@ -108,14 +107,12 @@ export function UI() {
         </div>
       )}
 
-      {/* Interactive Lobby & Respawn Overlays */}
+      {/* Lobby Overlay */}
       <AnimatePresence>
         {(!player || isDead) && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 flex items-center justify-center pointer-events-auto bg-[#04060b]/80 backdrop-blur-sm z-50 p-4" >
             <div className="bg-slate-950 border border-slate-800 rounded-lg p-6 max-w-sm w-full shadow-2xl relative overflow-hidden">
-              <div className="absolute right-0 top-0 text-[80px] opacity-5 select-none font-sans font-black pointer-events-none">
-                A7
-              </div>
+              <div className="absolute right-0 top-0 text-[80px] opacity-5 select-none font-sans font-black pointer-events-none"> A7 </div>
               <div className="flex items-center gap-2 text-xs text-slate-500 uppercase tracking-widest border-b border-slate-800/80 pb-3 mb-4">
                 <Terminal size={14} className="text-indigo-400" />
                 <span>STUDIO A7 // CENTRAL COMMAND</span>
@@ -132,50 +129,14 @@ export function UI() {
                 </div>
               )}
               <button onClick={joinGame} className="w-full py-3 bg-[#e2e8f0]/95 hover:bg-white text-slate-950 font-bold rounded text-sm transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 cursor-pointer" >
-                <Zap size={14} />
-                <span>{isDead ? 'RELAUNCH SYSTEM' : 'LAUNCH WOLF BOT'}</span>
+                <Zap size={14} /> <span>{isDead ? 'RELAUNCH SYSTEM' : 'LAUNCH WOLF BOT'}</span>
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Deploy & Embed Modal */}
-      <AnimatePresence>
-        {showEmbedModal && (
-          <div className="fixed inset-0 flex items-center justify-center pointer-events-auto bg-black/85 backdrop-blur-md z-50 p-4">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-slate-950 border border-slate-800 rounded-lg max-w-2xl w-full h-[520px] shadow-2xl flex flex-col relative overflow-hidden" >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/80 bg-slate-900/60">
-                <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <Code2 size={15} className="text-blue-400" />
-                  <span>STUDIO A7 // DIGITAL DEPLOYER</span>
-                </div>
-                <button onClick={() => setShowEmbedModal(false)} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors" >
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="flex bg-slate-900 border-b border-slate-800/60 overflow-x-auto text-[11px]">
-                <button onClick={() => setActiveTab('embed')} className={`px-4 py-2.5 font-bold transition-all border-r border-slate-800 flex items-center gap-1.5 ${ activeTab === 'embed' ? 'bg-[#0f172a] text-white border-b-2 border-b-blue-500' : 'text-slate-400 hover:text-slate-200' }`} >
-                  <Code2 size={13} /> <span>1. Embed Code</span>
-                </button>
-              </div>
-              <div className="flex-1 p-5 overflow-y-auto text-xs text-slate-300 font-sans select-text">
-                <div className="flex flex-col gap-4">
-                  <div className="bg-slate-900 border border-slate-800 rounded p-3 relative font-mono text-[10px] text-slate-400 whitespace-pre-wrap select-all">
-                    {iframeCode}
-                  </div>
-                </div>
-              </div>
-              <div className="px-4 py-3.5 border-t border-slate-800/80 bg-slate-900/60 flex items-center justify-between text-[11px] text-slate-500">
-                <span>Studio A7 Operational Framework</span>
-                <button onClick={() => setShowEmbedModal(false)} className="px-4 py-1.5 bg-slate-850 hover:bg-slate-800 border border-slate-705 rounded text-slate-300 hover:text-white font-bold transition-all" > Done </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Footer Branding Telemetry */}
+      {/* Footer Branding */}
       <div className="w-full pointer-events-auto flex justify-between items-center text-[10px] text-slate-600 border-t border-slate-900 pt-3 z-10 select-none">
         <div> <span>SYSTEM_OPERATIONAL // SECURE SOCKETS ACTIVE (WSS)</span> </div>
         <div> <span>// STUDIO A7: ADVANCED WEB INTERFACES SHOWCASE</span> </div>
