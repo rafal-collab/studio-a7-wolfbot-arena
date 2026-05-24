@@ -238,233 +238,42 @@ export function GameScene() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Helper - rysuje napis "www.studioa7.pl" pod wskazanym punktem
-    const drawDomain = (x: number, y: number, fontSize: number, alpha: number, color = '56, 189, 248') => {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.textAlign = 'center';
-      ctx.font = `${fontSize}px monospace`;
-      ctx.fillStyle = `rgba(${color}, 1)`;
-      ctx.letterSpacing = '1px';
-      ctx.fillText('www.studioa7.pl', x, y);
-      ctx.restore();
-    };
-
-    // Helper - pierścień / okrag dekoracyjny
-    const drawRing = (x: number, y: number, r: number, color: string, alpha: number, dash: number[] = []) => {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      if (dash.length) ctx.setLineDash(dash);
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    };
-
-    // Helper - hexagon outline
-    const drawHex = (x: number, y: number, r: number, color: string, alpha: number) => {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const angle = (Math.PI / 3) * i - Math.PI / 6;
-        const px = x + r * Math.cos(angle);
-        const py = y + r * Math.sin(angle);
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-      ctx.stroke();
-      ctx.restore();
-    };
-
-    const drawBackgroundStructure = (logoImg?: HTMLImageElement) => {
-      // --- TŁO ---
+    const drawBackgroundStructure = () => {
       ctx.fillStyle = '#05070c';
       ctx.fillRect(0, 0, 1024, 1024);
-
-      // Mgławice - więcej, żywsze kolory
-      const nebulae = [
-        { cx: 200, cy: 200, r1: 20, r2: 400, color: '2, 132, 199', a: 0.20 },
-        { cx: 820, cy: 800, r1: 40, r2: 500, color: '139, 92, 246', a: 0.16 },
-        { cx: 512, cy: 512, r1: 60, r2: 320, color: '16, 185, 129', a: 0.08 },
-        { cx: 100, cy: 750, r1: 10, r2: 280, color: '245, 158, 11', a: 0.09 },
-        { cx: 900, cy: 150, r1: 15, r2: 260, color: '236, 72, 153', a: 0.10 },
-        { cx: 650, cy: 350, r1: 5,  r2: 180, color: '99, 102, 241', a: 0.12 },
-      ];
-      nebulae.forEach(n => {
-        const g = ctx.createRadialGradient(n.cx, n.cy, n.r1, n.cx, n.cy, n.r2);
-        g.addColorStop(0, `rgba(${n.color}, ${n.a})`);
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, 1024, 1024);
-      });
-
-      // Siatka główna
-      ctx.strokeStyle = 'rgba(51, 65, 85, 0.18)';
+      const gradient1 = ctx.createRadialGradient(200, 200, 20, 300, 300, 400);
+      gradient1.addColorStop(0, 'rgba(2, 132, 199, 0.18)');
+      gradient1.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gradient1;
+      ctx.fillRect(0, 0, 1024, 1024);
+      const gradient2 = ctx.createRadialGradient(800, 800, 40, 700, 700, 500);
+      gradient2.addColorStop(0, 'rgba(139, 92, 246, 0.12)');
+      gradient2.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gradient2;
+      ctx.fillRect(0, 0, 1024, 1024);
+      ctx.strokeStyle = 'rgba(51, 65, 85, 0.15)';
       ctx.lineWidth = 1;
-      ctx.setLineDash([]);
       for (let c = 0; c < 1024; c += 64) {
         ctx.beginPath(); ctx.moveTo(c, 0); ctx.lineTo(c, 1024); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(0, c); ctx.lineTo(1024, c); ctx.stroke();
       }
-
-      // Siatka diagonalna - subtelna
-      ctx.strokeStyle = 'rgba(99, 102, 241, 0.06)';
-      ctx.lineWidth = 1;
-      for (let c = -1024; c < 2048; c += 128) {
-        ctx.beginPath(); ctx.moveTo(c, 0); ctx.lineTo(c + 1024, 1024); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(c, 0); ctx.lineTo(c - 1024, 1024); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      for (let s = 0; s < 60; s++) {
+        const x = (s * 417) % 1024;
+        const y = (s * 523) % 1024;
+        ctx.globalAlpha = 0.15 + (s % 4) * 0.2;
+        ctx.fillRect(x, y, 2, 2);
       }
-
-      // Gwiazdy - różne rozmiary i jasności
-      const starData = [
-        { size: 1, count: 80, alphaBase: 0.15, alphaRange: 0.25 },
-        { size: 2, count: 30, alphaBase: 0.20, alphaRange: 0.35 },
-        { size: 3, count: 12, alphaBase: 0.30, alphaRange: 0.40 },
-      ];
-      starData.forEach(({ size, count, alphaBase, alphaRange }) => {
-        for (let s = 0; s < count; s++) {
-          const seed = s * (size * 317 + 83);
-          const x = (seed * 417 + size * 111) % 1024;
-          const y = (seed * 523 + size * 199) % 1024;
-          ctx.globalAlpha = alphaBase + ((s % 5) / 5) * alphaRange;
-          ctx.fillStyle = s % 3 === 0 ? '#a5f3fc' : s % 3 === 1 ? '#e9d5ff' : '#ffffff';
-          ctx.fillRect(x, y, size, size);
-        }
-      });
       ctx.globalAlpha = 1.0;
-
-      // Pierścienie / okręgi dekoracyjne
-      drawRing(512, 512, 180, 'rgba(56, 189, 248, 0.12)', 1);
-      drawRing(512, 512, 280, 'rgba(139, 92, 246, 0.08)', 1, [8, 12]);
-      drawRing(512, 512, 420, 'rgba(16, 185, 129, 0.06)', 1, [4, 20]);
-      drawRing(220, 300, 70,  'rgba(56, 189, 248, 0.15)', 1, [6, 8]);
-      drawRing(804, 300, 70,  'rgba(139, 92, 246, 0.15)', 1, [6, 8]);
-      drawRing(100, 750, 50,  'rgba(245, 158, 11, 0.18)', 1, [3, 6]);
-      drawRing(900, 200, 55,  'rgba(236, 72, 153, 0.18)', 1, [3, 6]);
-      drawRing(650, 700, 45,  'rgba(99, 102, 241, 0.20)', 1);
-
-      // Hexagony dekoracyjne
-      drawHex(150, 850, 40, 'rgba(245, 158, 11, 0.25)', 1);
-      drawHex(880, 650, 35, 'rgba(236, 72, 153, 0.20)', 1);
-      drawHex(370, 780, 28, 'rgba(56, 189, 248, 0.18)', 1);
-      drawHex(720, 180, 32, 'rgba(16, 185, 129, 0.22)', 1);
-      drawHex(60,  400, 22, 'rgba(139, 92, 246, 0.20)', 1);
-      drawHex(960, 500, 25, 'rgba(56, 189, 248, 0.18)', 1);
-
-      // Małe krosshaire / celowniki
-      const crosshairs = [
-        { x: 150, y: 850, color: 'rgba(245, 158, 11, 0.35)' },
-        { x: 880, y: 650, color: 'rgba(236, 72, 153, 0.35)' },
-        { x: 60,  y: 400, color: 'rgba(139, 92, 246, 0.35)' },
-        { x: 960, y: 500, color: 'rgba(56, 189, 248, 0.35)' },
-      ];
-      crosshairs.forEach(({ x, y, color }) => {
-        ctx.save();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(x - 12, y); ctx.lineTo(x - 4, y); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x + 4,  y); ctx.lineTo(x + 12, y); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x, y - 12); ctx.lineTo(x, y - 4); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x, y + 4);  ctx.lineTo(x, y + 12); ctx.stroke();
-        ctx.restore();
-      });
-
-      // Scatter - frazy SEO rozsiane po planszy
-      const seoLabels = [
-        { text: 'LINK BUILDING',  x: 130, y: 130,  size: 10, color: '56, 189, 248',  a: 0.22 },
-        { text: 'POZYCJONOWANIE', x: 870, y: 950,  size: 10, color: '139, 92, 246',  a: 0.22 },
-        { text: 'CONTENT',        x: 900, y: 420,  size: 11, color: '16, 185, 129',  a: 0.25 },
-        { text: 'BACKLINKS',      x: 90,  y: 600,  size: 10, color: '245, 158, 11',  a: 0.22 },
-        { text: 'SERP',           x: 430, y: 900,  size: 12, color: '236, 72, 153',  a: 0.25 },
-        { text: 'KEYWORD RANK',   x: 600, y: 80,   size: 10, color: '99, 102, 241',  a: 0.22 },
-        { text: 'ORGANIC TRAFFIC',x: 310, y: 480,  size: 9,  color: '56, 189, 248',  a: 0.18 },
-        { text: 'DA / DR',        x: 750, y: 870,  size: 11, color: '245, 158, 11',  a: 0.22 },
-        { text: 'CRAWL',          x: 50,  y: 970,  size: 10, color: '16, 185, 129',  a: 0.20 },
-        { text: 'INDEXING',       x: 950, y: 80,   size: 10, color: '236, 72, 153',  a: 0.20 },
-        { text: 'CTR',            x: 480, y: 50,   size: 13, color: '139, 92, 246',  a: 0.28 },
-        { text: 'ANCHOR TEXT',    x: 200, y: 650,  size: 9,  color: '99, 102, 241',  a: 0.20 },
-      ];
-      seoLabels.forEach(({ text, x, y, size, color, a }) => {
-        ctx.save();
-        ctx.globalAlpha = a;
-        ctx.textAlign = 'center';
-        ctx.font = `bold ${size}px monospace`;
-        ctx.fillStyle = `rgba(${color}, 1)`;
-        ctx.letterSpacing = '2px';
-        ctx.fillText(text, x, y);
-        // domenka pod każdą frazą
-        drawDomain(x, y + size + 5, Math.max(7, size - 3), a * 0.75, color);
-        ctx.restore();
-      });
-
-      // --- GŁÓWNE NAPISY (SEO UNIVERSE / SEO GALAXY) ---
-      ctx.save();
       ctx.textAlign = 'center';
-
-      // SEO UNIVERSE - lewy
-      ctx.font = 'bold 24px monospace';
-      ctx.fillStyle = 'rgba(56, 189, 248, 0.42)';
-      ctx.letterSpacing = '5px';
-      ctx.globalAlpha = 1;
-      ctx.fillText('SEO UNIVERSE', 220, 175);
-      drawDomain(220, 195, 11, 0.38);
-
-      // SEO GALAXY - prawy
-      ctx.font = 'bold 24px monospace';
-      ctx.fillStyle = 'rgba(139, 92, 246, 0.42)';
-      ctx.letterSpacing = '5px';
-      ctx.fillText('SEO GALAXY', 804, 175);
-      drawDomain(804, 195, 11, 0.38, '139, 92, 246');
-
-      // STUDIO A7 - środek dołu
-      ctx.font = 'bold 16px monospace';
-      ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
-      ctx.letterSpacing = '6px';
-      ctx.fillText('STUDIO A7', 512, 870);
-      drawDomain(512, 888, 11, 0.32, '16, 185, 129');
-
-      ctx.restore();
-
-      // --- LOGA (jeśli załadowane) ---
-      if (logoImg) {
-        // Środek - duże logo
-        ctx.drawImage(logoImg, 512 - 120, 512 - 150, 240, 240);
-        drawDomain(512, 512 + 110, 13, 0.45);
-
-        // Lewy klaster
-        ctx.drawImage(logoImg, 220 - 45, 210, 90, 90);
-        drawDomain(220, 315, 10, 0.38);
-
-        // Prawy klaster
-        ctx.drawImage(logoImg, 804 - 45, 210, 90, 90);
-        drawDomain(804, 315, 10, 0.38, '139, 92, 246');
-
-        // Dodatkowe małe loga w rogach
-        ctx.globalAlpha = 0.35;
-        ctx.drawImage(logoImg, 30, 30, 55, 55);
-        ctx.globalAlpha = 1;
-        drawDomain(58, 95, 9, 0.28);
-
-        ctx.globalAlpha = 0.35;
-        ctx.drawImage(logoImg, 939, 30, 55, 55);
-        ctx.globalAlpha = 1;
-        drawDomain(966, 95, 9, 0.28, '139, 92, 246');
-
-        ctx.globalAlpha = 0.30;
-        ctx.drawImage(logoImg, 30, 939, 50, 50);
-        ctx.globalAlpha = 1;
-        drawDomain(55, 997, 9, 0.25, '245, 158, 11');
-
-        ctx.globalAlpha = 0.30;
-        ctx.drawImage(logoImg, 944, 939, 50, 50);
-        ctx.globalAlpha = 1;
-        drawDomain(969, 997, 9, 0.25, '16, 185, 129');
-      }
+      ctx.font = 'bold 22px monospace';
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.letterSpacing = '4px';
+      ctx.fillText('SEO UNIVERSE', 220, 180);
+      ctx.fillText('SEO GALAXY', 804, 180);
+      ctx.font = 'bold 12px monospace';
+      ctx.fillStyle = 'rgba(71, 85, 105, 0.4)';
+      ctx.fillText('// STUDIO A7 WEB SCENARIO NODE', 512, 940);
     };
 
     drawBackgroundStructure();
@@ -477,7 +286,10 @@ export function GameScene() {
     const img = new Image();
     img.src = logoUrl;
     img.onload = () => {
-      drawBackgroundStructure(img);
+      drawBackgroundStructure();
+      ctx.drawImage(img, 512 - 120, 512 - 140, 240, 240);
+      ctx.drawImage(img, 220 - 45, 210, 90, 90);
+      ctx.drawImage(img, 804 - 45, 210, 90, 90);
       tex.needsUpdate = true;
       setA7Texture(tex);
     };
