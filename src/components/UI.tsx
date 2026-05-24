@@ -152,9 +152,6 @@ export function UI() {
               <div className="mt-4 flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-900 pt-3">
                 {/* ZMIANA 3: wersja 1.02 */}
                 <span>V.1.02_REALTIME</span>
-                <button onClick={() => setShowEmbedModal(true)} className="text-blue-400 hover:underline hover:text-blue-300">
-                  Configure Website Integration
-                </button>
               </div>
             </div>
           </motion.div>
