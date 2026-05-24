@@ -176,8 +176,8 @@ export function UI() {
                   <h2 className="text-2xl font-black text-white tracking-tight font-sans mb-2">
                     WOLF BOT ARENA
                   </h2>
-                  <p className="text-slate-400 text-xs font-mono leading-relaxed">
-                    Pilot the Studio A7 organic SEO crawler. Absorb twinkling keyword lights on the grid map to grow your indexing length!
+                  <p className="text-slate-400 text-xs font-mono leading-relaxed"> 
+                    Welcome to the official Studio A7 3D WebGL showcase. Control the cybernetic Wolf Bot, avoid collisions with other units, and collect energy crystals to dominate the arena! </p>
                   </p>
                 </div>
               )}
