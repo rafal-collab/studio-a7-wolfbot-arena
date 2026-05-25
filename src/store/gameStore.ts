@@ -27,7 +27,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   connect: () => {
     if (get().socket) return;
     
-    const socket = io();
+    const socket = io('https://studio-a7-wolfbot.onrender.com');
 
     socket.on('connect', () => {
       console.log('Connected to server');
