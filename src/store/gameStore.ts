@@ -29,8 +29,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (get().socket) return;
 
     const socket = io(window.location.hostname === 'localhost' ?
-      'http://localhost:3000' : 'https://studio-a7-wolfbot.onrender.com');
-
+  'http://localhost:3000' : 'https://culpable-cabana-sharper.ngrok-free.dev',
+  {
+    extraHeaders: {
+      "ngrok-skip-browser-warning": "true"
+    }
+  }
+);
     socket.on('connect', () => {
       console.log('Connected to server');
     });
