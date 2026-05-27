@@ -31,6 +31,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const socket = io(window.location.hostname === 'localhost' ?
   'http://localhost:3000' : 'https://culpable-cabana-sharper.ngrok-free.dev',
   {
+    transports: ['websocket'],
     extraHeaders: {
       "ngrok-skip-browser-warning": "true"
     }
